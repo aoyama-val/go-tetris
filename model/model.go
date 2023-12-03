@@ -1,8 +1,11 @@
 package model
 
 import (
+	"bufio"
 	"fmt"
 	"math/rand"
+	"strconv"
+	"strings"
 
 	"github.com/pelletier/go-toml"
 )
@@ -195,14 +198,34 @@ func (g *Game) LoadConfig() {
 	}
 	seed, ok := config.Get("seed").(int64)
 	if ok {
-		fmt.Printf("seed = %d", seed)
+		fmt.Printf("seed = %d\n", seed)
 		rand.New(rand.NewSource(seed))
 	}
 
 	pattern, ok := config.Get("pattern").(string)
 	if ok {
+		var p Piles
+		scanner := bufio.NewScanner(strings.NewReader(pattern))
+		i := 0
+		for scanner.Scan() {
+			line := scanner.Text()
+			if err := scanner.Err(); err != nil {
+				msg := fmt.Sprintf("Error occurred: %v\n", err)
+				panic(msg)
+			}
+			cols := strings.Fields(line)
+			for j, col := range cols {
+				num, err := strconv.Atoi(col)
+				if err != nil {
+					msg := fmt.Sprintf("Error occurred while parsing line: i=%d: line=%s", i, line)
+					panic(msg)
+				}
+				p.Pattern[i][j] = uint8(num)
+			}
+			i += 1
+		}
+		g.Piles = p
 		fmt.Printf("pattern:%s", pattern)
-		// TODO: set piles
 	}
 }
 
@@ -305,8 +328,16 @@ func (g *Game) checkEraseRow() {
 	if len(filledRows) > 0 {
 		// そろった行を消す
 		maxFilledRow := filledRows[len(filledRows)-1]
-		// TODO: 実装
-
+		for y := int(maxFilledRow); y >= 0; y-- {
+			for x := 1; x <= int(BOARD_X_MAX)-1; x++ {
+				above := int(y) - len(filledRows)
+				if above >= 0 {
+					g.Piles.Pattern[y][x] = g.Piles.Pattern[above][x]
+				} else {
+					g.Piles.Pattern[y][x] = 0
+				}
+			}
+		}
 	}
 }
 
