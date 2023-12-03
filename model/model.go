@@ -237,14 +237,10 @@ func (g *Game) Update(command string) {
 	if g.SettleWait > 0 {
 		g.SettleWait -= 1
 		if g.SettleWait == 0 {
-			g.Block.moveByDelta(0, 1)
-			if g.isCollide() {
+			if g.isCollide(0, 1) {
 				// 床に接触している
-				g.Block.moveByDelta(0, -1)
 				g.settleBlock()
 				g.spawnBlock()
-			} else {
-				g.Block.moveByDelta(0, -1)
 			}
 		}
 	}
@@ -264,7 +260,7 @@ func (g *Game) Update(command string) {
 
 	if g.Frame != 0 && g.Frame%20 == 0 {
 		g.moveByDelta(0, 1)
-		if g.isCollide() {
+		if g.isCollide(0, 0) {
 			println("Game over!")
 			g.IsOver = true
 		} else {
@@ -276,13 +272,13 @@ func (g *Game) Update(command string) {
 	g.Frame += 1
 }
 
-func (g *Game) isCollide() bool {
+func (g *Game) isCollide(xDelta int32, yDelta int32) bool {
 	pattern := g.Block.GetPattern()
 	for i := 0; i < 5; i++ {
 		for j := 0; j < 5; j++ {
 			if pattern[i][j] != 0 {
-				newX := g.Block.X + int32(j)
-				newY := g.Block.Y + int32(i)
+				newX := g.Block.X + int32(j) + xDelta
+				newY := g.Block.Y + int32(i) + yDelta
 				if g.Piles.isFilled(uint(newX), uint(newY)) {
 					return true
 				}
@@ -304,15 +300,14 @@ func (g *Game) settleBlock() {
 }
 
 func (g *Game) moveByDelta(xDelta int32, yDelta int32) {
-	g.Block.moveByDelta(xDelta, yDelta)
-	if g.isCollide() {
-		g.Block.moveByDelta(-xDelta, -yDelta)
+	if !g.isCollide(xDelta, yDelta) {
+		g.Block.moveByDelta(xDelta, yDelta)
 	}
 }
 
 func (g *Game) rotate(dir int32) {
 	g.Block.rotate(dir)
-	if g.isCollide() {
+	if g.isCollide(0, 0) {
 		g.Block.rotate(-dir)
 	}
 }
