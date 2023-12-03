@@ -159,6 +159,10 @@ func (p *Piles) SetupWallAndFloor() {
 	}
 }
 
+func (p *Piles) isFilled(x uint, y uint) bool {
+	return p.Pattern[y][x] >= 1
+}
+
 type Game struct {
 	IsOver            bool
 	Frame             int32
@@ -203,11 +207,11 @@ func (g *Game) LoadConfig() {
 func (g *Game) Update(command string) {
 	switch command {
 	case "left":
-		g.Block.moveByDelta(-1, 0)
+		g.moveByDelta(-1, 0)
 	case "right":
-		g.Block.moveByDelta(1, 0)
+		g.moveByDelta(1, 0)
 	case "down":
-		g.Block.moveByDelta(0, 1)
+		g.moveByDelta(0, 1)
 	case "rotate_left":
 		g.rotate(1)
 	case "rotate_right":
@@ -215,14 +219,32 @@ func (g *Game) Update(command string) {
 	}
 }
 
-func (g *Game) isCollide(xDelta int32, yDelta int32) bool {
-	// TODO:実装
+func (g *Game) isCollide() bool {
+	pattern := g.Block.GetPattern()
+	for i := 0; i < 5; i++ {
+		for j := 0; j < 5; j++ {
+			if pattern[i][j] != 0 {
+				newX := g.Block.X + int32(j)
+				newY := g.Block.Y + int32(i)
+				if g.Piles.isFilled(uint(newX), uint(newY)) {
+					return true
+				}
+			}
+		}
+	}
 	return false
+}
+
+func (g *Game) moveByDelta(xDelta int32, yDelta int32) {
+	g.Block.moveByDelta(xDelta, yDelta)
+	if g.isCollide() {
+		g.Block.moveByDelta(-xDelta, -yDelta)
+	}
 }
 
 func (g *Game) rotate(dir int32) {
 	g.Block.rotate(dir)
-	if g.isCollide(0, 0) {
+	if g.isCollide() {
 		g.Block.rotate(-dir)
 	}
 }
