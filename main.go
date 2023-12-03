@@ -2,8 +2,16 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
+)
+
+const (
+	SCREEEN_WIDTH = 640
+	SCREEN_HEIGHT = 420
+	CELL_SIZE_PX  = 20
+	FPS           = 32
 )
 
 func main() {
@@ -14,8 +22,7 @@ func main() {
 	}
 	defer sdl.Quit()
 
-	window, err := sdl.CreateWindow("test", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
-		800, 600, sdl.WINDOW_SHOWN)
+	window, err := sdl.CreateWindow("go-tetris", sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, SCREEEN_WIDTH, SCREEN_HEIGHT, sdl.WINDOW_SHOWN)
 	if err != nil {
 		panic(err)
 	}
@@ -36,12 +43,23 @@ func main() {
 	running := true
 	for running {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-			switch event.(type) {
+			switch t := event.(type) {
 			case *sdl.QuitEvent:
 				println("Quit")
 				running = false
-				break
+			case *sdl.KeyboardEvent:
+				if t.State == sdl.PRESSED && t.Repeat == 0 {
+					keyCode := t.Keysym.Sym
+					switch keyCode {
+					case sdl.K_ESCAPE:
+						println("Escape Quit")
+						running = false
+					default:
+						fmt.Println("Pressed", keyCode)
+					}
+				}
 			}
 		}
+		time.Sleep((1000 / FPS) * time.Millisecond)
 	}
 }
