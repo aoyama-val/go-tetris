@@ -11,22 +11,22 @@ const (
 type Block struct {
 	X     int32
 	Y     int32
-	shape Shape
-	rot   int8
-	color uint8
+	Shape Shape
+	Rot   int8
+	Color uint8
 }
 
 type Piles struct {
 }
 
 type Game struct {
-	isOver            bool
-	frame             int32
-	settleWait        uint32
-	piles             Piles
+	IsOver            bool
+	Frame             int32
+	SettleWait        uint32
+	Piles             Piles
 	Block             Block
-	nextBlock         Block
-	blockCreatedCount uint32
+	NextBlock         Block
+	BlockCreatedCount uint32
 }
 
 func (g Game) Update(command string) {

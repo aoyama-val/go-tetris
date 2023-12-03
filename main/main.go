@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	m "github.com/aoyama-val/go-tetris/model"
@@ -15,13 +14,7 @@ const (
 	FPS           = 32
 )
 
-func sage() {
-	println("sage")
-}
-
 func main() {
-	fmt.Println("Hello world!")
-
 	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
 		panic(err)
 	}
@@ -33,7 +26,12 @@ func main() {
 	}
 	defer window.Destroy()
 
-	surface, err := window.GetSurface()
+	renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
+	if err != nil {
+		panic(err)
+	}
+
+	err = renderer.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
 	if err != nil {
 		panic(err)
 	}
@@ -47,7 +45,6 @@ func main() {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch t := event.(type) {
 			case *sdl.QuitEvent:
-				println("Quit")
 				running = false
 			case *sdl.KeyboardEvent:
 				if t.State == sdl.PRESSED && t.Repeat == 0 {
@@ -72,19 +69,43 @@ func main() {
 			}
 		}
 		game.Update(command)
-		if command != "" {
-			fmt.Println("command=", command)
-		}
-		render(surface, window, &game)
+		render(renderer, window, &game)
 		time.Sleep((1000 / FPS) * time.Millisecond)
 	}
 }
 
-func render(surface *sdl.Surface, window *sdl.Window, game *m.Game) {
-	surface.FillRect(nil, 0)
-	rect := sdl.Rect{game.Block.X, game.Block.Y, 200, 200}
-	colour := sdl.Color{R: 255, G: 0, B: 255, A: 255} // purple
-	pixel := sdl.MapRGBA(surface.Format, colour.R, colour.G, colour.B, colour.A)
-	surface.FillRect(&rect, pixel)
-	window.UpdateSurface()
+func render(renderer *sdl.Renderer, window *sdl.Window, game *m.Game) {
+	renderer.SetDrawColor(0, 0, 0, 0)
+	renderer.Clear()
+
+	// render piles
+	rect := sdl.Rect{X: game.Block.X, Y: game.Block.Y, W: CELL_SIZE_PX, H: CELL_SIZE_PX}
+	renderer.SetDrawColor(128, 128, 128, 255)
+	renderer.FillRect(&rect)
+	// render block
+	// render next block
+
+	if game.IsOver {
+		renderer.SetDrawColor(0, 0, 0, 128)
+		renderer.FillRect(&sdl.Rect{X: 0, Y: 0, W: SCREEEN_WIDTH, H: SCREEN_HEIGHT})
+	}
+
+	renderer.Present()
+}
+
+func getColor(colorNum uint8) sdl.Color {
+	switch colorNum {
+	case 0:
+		return sdl.Color{R: 0, G: 0, B: 0}
+	case 1:
+		return sdl.Color{R: 128, G: 128, B: 128, A: 255}
+	case 2:
+		return sdl.Color{R: 255, G: 128, B: 128}
+	case 3:
+		return sdl.Color{R: 128, G: 255, B: 128}
+	case 4:
+		return sdl.Color{R: 128, G: 128, B: 255}
+	default:
+		return sdl.Color{R: 255, G: 255, B: 255}
+	}
 }
