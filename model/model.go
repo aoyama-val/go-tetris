@@ -3,6 +3,8 @@ package model
 import (
 	"fmt"
 	"math/rand"
+
+	"github.com/pelletier/go-toml"
 )
 
 const (
@@ -177,6 +179,27 @@ func NewGame() *Game {
 	g.BlockCreatedCount += 1
 	g.spawnBlock()
 	return g
+}
+
+func (g *Game) LoadConfig() {
+	filename := "tetris.toml"
+	config, err := toml.LoadFile(filename)
+	if err != nil {
+		return
+	}
+	seedObj := config.Get("seed")
+	if seedObj != nil {
+		seed := seedObj.(int64)
+		fmt.Printf("seed = %d", seed)
+		rand.New(rand.NewSource(seed))
+	}
+
+	patternObj := config.Get("pattern")
+	if patternObj != nil {
+		pattern := patternObj.(string)
+		fmt.Printf("pattern:%s", pattern)
+		// TODO: set piles
+	}
 }
 
 func (g *Game) Update(command string) {

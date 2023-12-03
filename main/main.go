@@ -38,6 +38,7 @@ func main() {
 
 	running := true
 	game := m.NewGame()
+	game.LoadConfig()
 
 	for running {
 		command := ""
