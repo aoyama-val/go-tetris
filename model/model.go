@@ -187,16 +187,14 @@ func (g *Game) LoadConfig() {
 	if err != nil {
 		return
 	}
-	seedObj := config.Get("seed")
-	if seedObj != nil {
-		seed := seedObj.(int64)
+	seed, ok := config.Get("seed").(int64)
+	if ok {
 		fmt.Printf("seed = %d", seed)
 		rand.New(rand.NewSource(seed))
 	}
 
-	patternObj := config.Get("pattern")
-	if patternObj != nil {
-		pattern := patternObj.(string)
+	pattern, ok := config.Get("pattern").(string)
+	if ok {
 		fmt.Printf("pattern:%s", pattern)
 		// TODO: set piles
 	}
