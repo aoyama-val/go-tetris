@@ -2,10 +2,10 @@ program = ./go-tetris
 arg =
 
 .PHONY: all
-all: check build
+all: lint build
 
-.PHONY: check
-check:
+.PHONY: lint
+lint:
 	go vet main/*.go
 	go vet model/*.go
 

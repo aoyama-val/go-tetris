@@ -205,6 +205,21 @@ func (g *Game) LoadConfig() {
 }
 
 func (g *Game) Update(command string) {
+	if g.IsOver {
+		return
+	}
+
+	if g.SettleWait > 0 {
+		g.SettleWait -= 1
+		if g.SettleWait == 0 {
+			// 床に接触した
+			if g.isCollide() {
+				g.settleBlock()
+				g.spawnBlock()
+			}
+		}
+	}
+
 	switch command {
 	case "left":
 		g.moveByDelta(-1, 0)
@@ -217,6 +232,19 @@ func (g *Game) Update(command string) {
 	case "rotate_right":
 		g.rotate(-1)
 	}
+
+	if g.Frame != 0 && g.Frame%20 == 0 {
+		g.moveByDelta(0, 1)
+		if g.isCollide() {
+			println("Game over!")
+			g.IsOver = true
+		} else {
+			g.SettleWait = 15
+		}
+	}
+	g.checkEraseRow()
+
+	g.Frame += 1
 }
 
 func (g *Game) isCollide() bool {
@@ -233,6 +261,10 @@ func (g *Game) isCollide() bool {
 		}
 	}
 	return false
+}
+
+func (g *Game) settleBlock() {
+	// TODO: 実装
 }
 
 func (g *Game) moveByDelta(xDelta int32, yDelta int32) {
@@ -253,4 +285,12 @@ func (g *Game) spawnBlock() {
 	g.Block = g.NextBlock
 	g.NextBlock = createRandomBlock(g.BlockCreatedCount)
 	g.BlockCreatedCount += 1
+}
+
+func (g *Game) checkEraseRow() {
+	// TODO: 実装
+}
+
+func (g *Game) getFilledRows() {
+
 }
