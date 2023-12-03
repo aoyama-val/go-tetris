@@ -14,35 +14,8 @@ const (
 	FPS           = 32
 )
 
-type Shape int
-
-const (
-	SHAPE_MAX = 6
-)
-
-type Block struct {
-	x     int32
-	y     int32
-	shape Shape
-	rot   int8
-	color uint8
-}
-
-type Piles struct {
-}
-
-type Game struct {
-	isOver            bool
-	frame             int32
-	settleWait        uint32
-	piles             Piles
-	block             Block
-	nextBlock         Block
-	blockCreatedCount uint32
-}
-
-func (g Game) Update(command string) {
-	fmt.Println("command=", command)
+func sage() {
+	println("sage")
 }
 
 func main() {
@@ -67,8 +40,6 @@ func main() {
 	running := true
 	var game Game
 	var command string
-	var x int32
-	var y int32
 
 	for running {
 		command = ""
@@ -103,14 +74,14 @@ func main() {
 		if command != "" {
 			fmt.Println("command=", command)
 		}
-		render(surface, window, x, y)
+		render(surface, window, &game)
 		time.Sleep((1000 / FPS) * time.Millisecond)
 	}
 }
 
-func render(surface *sdl.Surface, window *sdl.Window, x int32, y int32) {
+func render(surface *sdl.Surface, window *sdl.Window, game *Game) {
 	surface.FillRect(nil, 0)
-	rect := sdl.Rect{x, y, 200, 200}
+	rect := sdl.Rect{game.block.x, game.block.y, 200, 200}
 	colour := sdl.Color{R: 255, G: 0, B: 255, A: 255} // purple
 	pixel := sdl.MapRGBA(surface.Format, colour.R, colour.G, colour.B, colour.A)
 	surface.FillRect(&rect, pixel)
