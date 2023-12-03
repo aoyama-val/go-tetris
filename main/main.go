@@ -37,11 +37,10 @@ func main() {
 	}
 
 	running := true
-	var game m.Game
-	var command string
+	game := m.NewGame()
 
 	for running {
-		command = ""
+		command := ""
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch t := event.(type) {
 			case *sdl.QuitEvent:
@@ -69,7 +68,7 @@ func main() {
 			}
 		}
 		game.Update(command)
-		render(renderer, window, &game)
+		render(renderer, window, game)
 		time.Sleep((1000 / FPS) * time.Millisecond)
 	}
 }
@@ -79,9 +78,19 @@ func render(renderer *sdl.Renderer, window *sdl.Window, game *m.Game) {
 	renderer.Clear()
 
 	// render piles
-	rect := sdl.Rect{X: game.Block.X, Y: game.Block.Y, W: CELL_SIZE_PX, H: CELL_SIZE_PX}
-	renderer.SetDrawColor(128, 128, 128, 255)
-	renderer.FillRect(&rect)
+	for i := 0; i < len(game.Piles.Pattern); i++ {
+		for j := 0; j < len(game.Piles.Pattern[i]); j++ {
+			if game.Piles.Pattern[i][j] >= 1 {
+				color := getColor(game.Piles.Pattern[i][j])
+				renderer.SetDrawColor(color.R, color.G, color.B, color.A)
+				var x int32 = (m.LEFT_WALL_X + int32(j)) * CELL_SIZE_PX
+				var y int32 = int32(i) * CELL_SIZE_PX
+				rect := sdl.Rect{X: x, Y: y, W: CELL_SIZE_PX, H: CELL_SIZE_PX}
+				renderer.FillRect(&rect)
+			}
+		}
+
+	}
 	// render block
 	// render next block
 
