@@ -32,16 +32,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	surface.FillRect(nil, 0)
-
-	rect := sdl.Rect{0, 0, 200, 200}
-	colour := sdl.Color{R: 255, G: 0, B: 255, A: 255} // purple
-	pixel := sdl.MapRGBA(surface.Format, colour.R, colour.G, colour.B, colour.A)
-	surface.FillRect(&rect, pixel)
-	window.UpdateSurface()
 
 	running := true
+	var command string
+	var x int32
+	var y int32
+
 	for running {
+		command = ""
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch t := event.(type) {
 			case *sdl.QuitEvent:
@@ -52,14 +50,36 @@ func main() {
 					keyCode := t.Keysym.Sym
 					switch keyCode {
 					case sdl.K_ESCAPE:
-						println("Escape Quit")
 						running = false
-					default:
-						fmt.Println("Pressed", keyCode)
+					case sdl.K_LEFT:
+						command = "left"
+						x -= 1
+					case sdl.K_RIGHT:
+						command = "right"
+						x += 1
+					case sdl.K_DOWN:
+						command = "down"
+					case sdl.K_z:
+						command = "rotate_left"
+					case sdl.K_x:
+						command = "rotate_right"
 					}
 				}
 			}
 		}
+		if command != "" {
+			fmt.Println("command=", command)
+		}
+		render(surface, window, x, y)
 		time.Sleep((1000 / FPS) * time.Millisecond)
 	}
+}
+
+func render(surface *sdl.Surface, window *sdl.Window, x int32, y int32) {
+	surface.FillRect(nil, 0)
+	rect := sdl.Rect{x, y, 200, 200}
+	colour := sdl.Color{R: 255, G: 0, B: 255, A: 255} // purple
+	pixel := sdl.MapRGBA(surface.Format, colour.R, colour.G, colour.B, colour.A)
+	surface.FillRect(&rect, pixel)
+	window.UpdateSurface()
 }
