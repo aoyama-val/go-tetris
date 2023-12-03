@@ -145,8 +145,10 @@ func createRandomBlock(createCount uint32) Block {
 	}
 }
 
+// 壁と床を含めた堆積物を表す構造体
+// 壁と床は別にした方が良かったかも
 type Piles struct {
-	Pattern [BOARD_Y_LEN][BOARD_X_LEN]uint8
+	Pattern [BOARD_Y_LEN][BOARD_X_LEN]uint8 // 0:なし 1:壁or床 2〜:ブロック残骸
 }
 
 func (p *Piles) SetupWallAndFloor() {
@@ -212,10 +214,14 @@ func (g *Game) Update(command string) {
 	if g.SettleWait > 0 {
 		g.SettleWait -= 1
 		if g.SettleWait == 0 {
-			// 床に接触した
+			g.Block.moveByDelta(0, 1)
 			if g.isCollide() {
+				// 床に接触している
+				g.Block.moveByDelta(0, -1)
 				g.settleBlock()
 				g.spawnBlock()
+			} else {
+				g.Block.moveByDelta(0, -1)
 			}
 		}
 	}
@@ -264,7 +270,14 @@ func (g *Game) isCollide() bool {
 }
 
 func (g *Game) settleBlock() {
-	// TODO: 実装
+	blockPattern := g.Block.GetPattern()
+	for i := 0; i < 5; i++ {
+		for j := 0; j < 5; j++ {
+			if blockPattern[i][j] == 1 {
+				g.Piles.Pattern[uint(g.Block.Y+int32(i))][uint(g.Block.X+int32(j))] = 2 + g.Block.Color
+			}
+		}
+	}
 }
 
 func (g *Game) moveByDelta(xDelta int32, yDelta int32) {
@@ -288,9 +301,27 @@ func (g *Game) spawnBlock() {
 }
 
 func (g *Game) checkEraseRow() {
-	// TODO: 実装
+	filledRows := g.getFilledRows()
+	if len(filledRows) > 0 {
+		// そろった行を消す
+		maxFilledRow := filledRows[len(filledRows)-1]
+		// TODO: 実装
+
+	}
 }
 
-func (g *Game) getFilledRows() {
-
+func (g *Game) getFilledRows() []uint {
+	var result []uint
+	for y := BOARD_Y_MIN; y <= BOARD_Y_MAX-1; y++ {
+		isFilled := true
+		for x := 1; x <= int(BOARD_X_MAX)-1; x++ {
+			if !g.Piles.isFilled(uint(x), uint(y)) {
+				isFilled = false
+			}
+		}
+		if isFilled {
+			result = append(result, uint(y))
+		}
+	}
+	return result
 }
