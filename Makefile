@@ -11,7 +11,7 @@ check:
 
 .PHONY: build
 build:
-	go build -o go-tetris main/main.go
+	go build -o $(program) main/main.go
 
 .PHONY: clean
 clean:
