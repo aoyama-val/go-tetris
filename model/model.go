@@ -103,9 +103,34 @@ type Block struct {
 }
 
 func (b *Block) GetPattern() Pattern {
-	base := b.Shape.getBasePattern()
-	return base
-	// TODO: 回転対応
+	result := b.Shape.getBasePattern()
+	for i := 0; i < int(b.Rot); i++ {
+		result = rotatePattern(result)
+	}
+	return result
+}
+
+func rotatePattern(p Pattern) Pattern {
+	result := p
+	for i := 0; i < 5; i++ {
+		for j := 0; j < 5; j++ {
+			result[4-j][i] = p[i][j]
+		}
+	}
+	return result
+}
+
+func (b *Block) rotate(dir int32) {
+	if dir > 0 {
+		b.Rot = (b.Rot + 1) % 4
+	} else {
+		b.Rot = (b.Rot + 3) % 4
+	}
+}
+
+func (b *Block) moveByDelta(xDelta int32, yDelta int32) {
+	b.X += xDelta
+	b.Y += yDelta
 }
 
 func createRandomBlock(createCount uint32) Block {
@@ -155,14 +180,29 @@ func NewGame() *Game {
 }
 
 func (g *Game) Update(command string) {
-	if command != "" {
-		fmt.Println("command=", command)
-		switch command {
-		case "left":
-			g.Block.X -= 1
-		case "right":
-			g.Block.X += 1
-		}
+	switch command {
+	case "left":
+		g.Block.moveByDelta(-1, 0)
+	case "right":
+		g.Block.moveByDelta(1, 0)
+	case "down":
+		g.Block.moveByDelta(0, 1)
+	case "rotate_left":
+		g.rotate(1)
+	case "rotate_right":
+		g.rotate(-1)
+	}
+}
+
+func (g *Game) isCollide(xDelta int32, yDelta int32) bool {
+	// TODO:実装
+	return false
+}
+
+func (g *Game) rotate(dir int32) {
+	g.Block.rotate(dir)
+	if g.isCollide(0, 0) {
+		g.Block.rotate(-dir)
 	}
 }
 
