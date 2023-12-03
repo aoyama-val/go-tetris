@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	m "github.com/aoyama-val/go-tetris/model"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -38,7 +39,7 @@ func main() {
 	}
 
 	running := true
-	var game Game
+	var game m.Game
 	var command string
 
 	for running {
@@ -56,10 +57,10 @@ func main() {
 						running = false
 					case sdl.K_LEFT:
 						command = "left"
-						game.block.x -= 1
+						game.Block.X -= 1
 					case sdl.K_RIGHT:
 						command = "right"
-						game.block.x += 1
+						game.Block.X += 1
 					case sdl.K_DOWN:
 						command = "down"
 					case sdl.K_z:
@@ -79,9 +80,9 @@ func main() {
 	}
 }
 
-func render(surface *sdl.Surface, window *sdl.Window, game *Game) {
+func render(surface *sdl.Surface, window *sdl.Window, game *m.Game) {
 	surface.FillRect(nil, 0)
-	rect := sdl.Rect{game.block.x, game.block.y, 200, 200}
+	rect := sdl.Rect{game.Block.X, game.Block.Y, 200, 200}
 	colour := sdl.Color{R: 255, G: 0, B: 255, A: 255} // purple
 	pixel := sdl.MapRGBA(surface.Format, colour.R, colour.G, colour.B, colour.A)
 	surface.FillRect(&rect, pixel)

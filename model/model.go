@@ -1,4 +1,4 @@
-package main
+package model
 
 import "fmt"
 
@@ -9,8 +9,8 @@ const (
 )
 
 type Block struct {
-	x     int32
-	y     int32
+	X     int32
+	Y     int32
 	shape Shape
 	rot   int8
 	color uint8
@@ -24,12 +24,13 @@ type Game struct {
 	frame             int32
 	settleWait        uint32
 	piles             Piles
-	block             Block
+	Block             Block
 	nextBlock         Block
 	blockCreatedCount uint32
 }
 
 func (g Game) Update(command string) {
-	fmt.Println("command=", command)
-	sage()
+	if command != "" {
+		fmt.Println("command=", command)
+	}
 }

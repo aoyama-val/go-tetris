@@ -1,4 +1,3 @@
-package = github.com/aoyama-val/go-tetris
 program = ./go-tetris
 arg =
 
@@ -7,11 +6,12 @@ all: check build
 
 .PHONY: check
 check:
-	go vet $(package)
+	go vet main/*.go
+	go vet model/*.go
 
 .PHONY: build
 build:
-	go build
+	go build -o go-tetris main/main.go
 
 .PHONY: clean
 clean:
@@ -19,4 +19,4 @@ clean:
 
 .PHONY: run
 run:
-	go run main.go model.go
+	go run main/main.go
