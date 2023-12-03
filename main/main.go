@@ -53,10 +53,8 @@ func main() {
 						running = false
 					case sdl.K_LEFT:
 						command = "left"
-						game.Block.X -= 1
 					case sdl.K_RIGHT:
 						command = "right"
-						game.Block.X += 1
 					case sdl.K_DOWN:
 						command = "down"
 					case sdl.K_z:
@@ -92,7 +90,10 @@ func render(renderer *sdl.Renderer, window *sdl.Window, game *m.Game) {
 
 	}
 	// render block
+	renderBlock(renderer, &game.Block, m.LEFT_WALL_X+game.Block.X, game.Block.Y)
+
 	// render next block
+	renderBlock(renderer, &game.NextBlock, 21, 0)
 
 	if game.IsOver {
 		renderer.SetDrawColor(0, 0, 0, 128)
@@ -102,6 +103,21 @@ func render(renderer *sdl.Renderer, window *sdl.Window, game *m.Game) {
 	renderer.Present()
 }
 
+func renderBlock(r *sdl.Renderer, block *m.Block, xInCell int32, yInCell int32) {
+	color := getColor(block.Color + 2)
+	r.SetDrawColor(color.R, color.G, color.B, color.A)
+	pattern := block.GetPattern()
+	for j := 0; j < len(pattern); j++ {
+		for i := 0; i < len(pattern[j]); i++ {
+			if pattern[j][i] == 1 {
+				x := (xInCell + int32(i)) * CELL_SIZE_PX
+				y := (yInCell + int32(j)) * CELL_SIZE_PX
+				r.FillRect(&sdl.Rect{X: x, Y: y, W: CELL_SIZE_PX, H: CELL_SIZE_PX})
+			}
+		}
+	}
+}
+
 func getColor(colorNum uint8) sdl.Color {
 	switch colorNum {
 	case 0:
@@ -109,12 +125,12 @@ func getColor(colorNum uint8) sdl.Color {
 	case 1:
 		return sdl.Color{R: 128, G: 128, B: 128, A: 255}
 	case 2:
-		return sdl.Color{R: 255, G: 128, B: 128}
+		return sdl.Color{R: 255, G: 128, B: 128, A: 255}
 	case 3:
-		return sdl.Color{R: 128, G: 255, B: 128}
+		return sdl.Color{R: 128, G: 255, B: 128, A: 255}
 	case 4:
-		return sdl.Color{R: 128, G: 128, B: 255}
+		return sdl.Color{R: 128, G: 128, B: 255, A: 255}
 	default:
-		return sdl.Color{R: 255, G: 255, B: 255}
+		return sdl.Color{R: 255, G: 255, B: 255, A: 255}
 	}
 }

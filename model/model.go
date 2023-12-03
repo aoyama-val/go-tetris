@@ -1,6 +1,9 @@
 package model
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+)
 
 const (
 	BOARD_X_LEN uint32 = 12
@@ -12,11 +15,84 @@ const (
 	LEFT_WALL_X int32  = 6
 )
 
+type Pattern [5][5]uint8
+
 type Shape int
 
 const (
+	SHAPE_S0  = 0
+	SHAPE_S1  = 1
+	SHAPE_S2  = 2
+	SHAPE_S3  = 3
+	SHAPE_S4  = 4
+	SHAPE_S5  = 5
+	SHAPE_S6  = 6
 	SHAPE_MAX = 6
 )
+
+func (s *Shape) getBasePattern() Pattern {
+	switch *s {
+	case 0:
+		return Pattern{
+			{0, 0, 0, 0, 0},
+			{0, 0, 1, 0, 0},
+			{0, 0, 1, 0, 0},
+			{0, 0, 1, 0, 0},
+			{0, 0, 1, 0, 0},
+		}
+	case 1:
+		return Pattern{
+			{0, 0, 0, 0, 0},
+			{0, 0, 1, 0, 0},
+			{0, 0, 1, 0, 0},
+			{0, 0, 1, 1, 0},
+			{0, 0, 0, 0, 0},
+		}
+	case 2:
+		return Pattern{
+			{0, 0, 0, 0, 0},
+			{0, 0, 1, 0, 0},
+			{0, 0, 1, 0, 0},
+			{0, 1, 1, 0, 0},
+			{0, 0, 0, 0, 0},
+		}
+	case 3:
+		return Pattern{
+			{0, 0, 0, 0, 0},
+			{0, 0, 1, 1, 0},
+			{0, 0, 1, 1, 0},
+			{0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0},
+		}
+	case 4:
+		return Pattern{
+			{0, 0, 0, 0, 0},
+			{0, 0, 1, 0, 0},
+			{0, 1, 1, 1, 0},
+			{0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0},
+		}
+	case 5:
+		return Pattern{
+			{0, 0, 0, 0, 0},
+			{0, 0, 1, 1, 0},
+			{0, 1, 1, 0, 0},
+			{0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0},
+		}
+	case 6:
+		return Pattern{
+			{0, 0, 0, 0, 0},
+			{0, 1, 1, 0, 0},
+			{0, 0, 1, 1, 0},
+			{0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0},
+		}
+	default:
+		msg := fmt.Sprintf("Invalid shape: %v", *s)
+		panic(msg)
+	}
+}
 
 type Block struct {
 	X     int32
@@ -24,6 +100,22 @@ type Block struct {
 	Shape Shape
 	Rot   int8
 	Color uint8
+}
+
+func (b *Block) GetPattern() Pattern {
+	base := b.Shape.getBasePattern()
+	return base
+	// TODO: 回転対応
+}
+
+func createRandomBlock(createCount uint32) Block {
+	return Block{
+		X:     4,
+		Y:     0,
+		Shape: Shape(rand.Intn(SHAPE_MAX + 1)),
+		Rot:   0,
+		Color: uint8(createCount % 3),
+	}
 }
 
 type Piles struct {
@@ -56,13 +148,26 @@ func NewGame() *Game {
 	g.Frame = 0
 	g.SettleWait = 0
 	g.Piles.SetupWallAndFloor()
-	// g.NextBlock = createRandomBlock()
-	g.BlockCreatedCount = 0
+	g.NextBlock = createRandomBlock(g.BlockCreatedCount)
+	g.BlockCreatedCount += 1
+	g.spawnBlock()
 	return g
 }
 
-func (g Game) Update(command string) {
+func (g *Game) Update(command string) {
 	if command != "" {
 		fmt.Println("command=", command)
+		switch command {
+		case "left":
+			g.Block.X -= 1
+		case "right":
+			g.Block.X += 1
+		}
 	}
+}
+
+func (g *Game) spawnBlock() {
+	g.Block = g.NextBlock
+	g.NextBlock = createRandomBlock(g.BlockCreatedCount)
+	g.BlockCreatedCount += 1
 }
