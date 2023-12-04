@@ -6,12 +6,12 @@ all: lint build
 
 .PHONY: lint
 lint:
-	go vet main/*.go
+	go vet main.go
 	go vet model/*.go
 
 .PHONY: build
 build:
-	go build -o $(program) main/main.go
+	go build -o $(program)
 
 .PHONY: clean
 clean:
@@ -19,7 +19,7 @@ clean:
 
 .PHONY: run
 run:
-	go run main/main.go
+	go run main.go
 
 .PHONY: test
 test:
