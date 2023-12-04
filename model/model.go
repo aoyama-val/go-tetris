@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/pelletier/go-toml"
 )
@@ -138,11 +139,11 @@ func (b *Block) moveByDelta(xDelta int32, yDelta int32) {
 	b.Y += yDelta
 }
 
-func createRandomBlock(createCount uint32) Block {
+func createRandomBlock(rng *rand.Rand, createCount uint32) Block {
 	return Block{
 		X:     4,
 		Y:     0,
-		Shape: Shape(rand.Intn(SHAPE_MAX + 1)),
+		Shape: Shape(rng.Intn(SHAPE_MAX + 1)),
 		Rot:   0,
 		Color: uint8(createCount % 3),
 	}
@@ -169,6 +170,7 @@ func (p *Piles) isFilled(x uint, y uint) bool {
 }
 
 type Game struct {
+	Rng               *rand.Rand
 	IsOver            bool
 	Frame             int32
 	SettleWait        uint32
@@ -179,14 +181,15 @@ type Game struct {
 }
 
 func NewGame() *Game {
+	timestamp := time.Now().Unix()
+	rng := rand.New(rand.NewSource(timestamp))
+
 	g := &Game{}
+	g.Rng = rng
 	g.IsOver = false
 	g.Frame = 0
 	g.SettleWait = 0
 	g.Piles.SetupWallAndFloor()
-	g.NextBlock = createRandomBlock(g.BlockCreatedCount)
-	g.BlockCreatedCount += 1
-	g.spawnBlock()
 	return g
 }
 
@@ -199,7 +202,8 @@ func (g *Game) LoadConfig() {
 	seed, ok := config.Get("seed").(int64)
 	if ok {
 		fmt.Printf("seed = %d\n", seed)
-		rand.New(rand.NewSource(seed))
+		rng := rand.New(rand.NewSource(seed))
+		g.Rng = rng
 	}
 
 	pattern, ok := config.Get("pattern").(string)
@@ -226,6 +230,12 @@ func (g *Game) LoadConfig() {
 		}
 		g.Piles = p
 		fmt.Printf("pattern:%s", pattern)
+	}
+}
+
+func (g *Game) InitRandomly() {
+	for i := 0; i < 2; i++ {
+		g.spawnBlock()
 	}
 }
 
@@ -314,7 +324,7 @@ func (g *Game) rotate(dir int32) {
 
 func (g *Game) spawnBlock() {
 	g.Block = g.NextBlock
-	g.NextBlock = createRandomBlock(g.BlockCreatedCount)
+	g.NextBlock = createRandomBlock(g.Rng, g.BlockCreatedCount)
 	g.BlockCreatedCount += 1
 }
 
