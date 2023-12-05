@@ -173,7 +173,6 @@ type Game struct {
 	Rng               *rand.Rand
 	IsOver            bool
 	Frame             int32
-	SettleWait        uint32
 	Piles             Piles
 	Block             Block
 	NextBlock         Block
@@ -188,7 +187,6 @@ func NewGame() *Game {
 	g.Rng = rng
 	g.IsOver = false
 	g.Frame = 0
-	g.SettleWait = 0
 	g.Piles.SetupWallAndFloor()
 	return g
 }
@@ -244,17 +242,6 @@ func (g *Game) Update(command string) {
 		return
 	}
 
-	if g.SettleWait > 0 {
-		g.SettleWait -= 1
-		if g.SettleWait == 0 {
-			if g.isCollide(0, 1) {
-				// 床に接触している
-				g.settleBlock()
-				g.spawnBlock()
-			}
-		}
-	}
-
 	switch command {
 	case "left":
 		g.moveByDelta(-1, 0)
@@ -269,15 +256,19 @@ func (g *Game) Update(command string) {
 	}
 
 	if g.Frame != 0 && g.Frame%20 == 0 {
-		g.moveByDelta(0, 1)
-		if g.isCollide(0, 0) {
-			println("Game over!")
-			g.IsOver = true
+		if g.isCollide(0, 1) {
+			// すでに床に接触しているなら固定
+			g.settleBlock()
+			g.checkEraseRow()
+			g.spawnBlock()
+			if g.isCollide(0, 0) {
+				g.IsOver = true
+				println("Game over!")
+			}
 		} else {
-			g.SettleWait = 15
+			g.moveByDelta(0, 1)
 		}
 	}
-	g.checkEraseRow()
 
 	g.Frame += 1
 }
